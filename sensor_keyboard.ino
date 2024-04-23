@@ -2,17 +2,27 @@
 #include <Wire.h>
 #include <Adafruit_Sensor.h>
 #include <Adafruit_ADXL343.h>
+#include "Fsr.h"
 
 const int buttonPin = 2;
 
 int buttonState = 0;
 
+const int fsr1Pin = A4;
+const int fsr2Pin = A5;
+
 //initial key input states per sensor
 bool buttonOn = true;
-bool accelOn = false;
+bool tiltOn = false;
+bool fsrOn = false;
+bool bounceOn = true;
 
 //instantiate accelerometer
 Adafruit_ADXL343 accel = Adafruit_ADXL343(12345, &Wire1);
+
+//instantiate force sensitive resistors
+Fsr fsr1(fsr1Pin, 200, 800, 100, 800);
+Fsr fsr2(fsr2Pin, 300, 900, 100, 800);
 
 void setup() {
   
@@ -26,7 +36,7 @@ void setup() {
     while(1);
   }
 
-  accel.setRange(ADXL343_RANGE_8_G);
+  accel.setRange(ADXL343_RANGE_4_G);
 
   pinMode(buttonPin, INPUT);
 }
@@ -39,8 +49,8 @@ void loop() {
   sensors_event_t event;
   accel.getEvent(&event);
 
-  //accelerometer key input
-  if (accelOn)
+  //accelerometer key input when tilted along X-axis
+  if (tiltOn)
   {
     if (event.acceleration.x > 3.0)
     {
@@ -55,10 +65,35 @@ void loop() {
     }
   }
 
+  //accelerometer key input when bounced along Z-axis
+  if (bounceOn)
+  {
+    bool didBounce = detectBounce(event, 12.0);
+    if (didBounce)
+    {
+      Keyboard.write('G');
+      delay(400);
+    }
+  }
+
   //button key input
-  if (buttonState == HIGH && buttonOn)
+  if (buttonOn && buttonState == HIGH)
   {
     Keyboard.write('B');
+  }
+
+  //fsr key input, interval between keypresses decreases with increased pressure
+  if (fsrOn)
+  {
+    if(fsr2.checkInterval()){
+      Keyboard.write('N');
+      delay(fsr2.getInterval());
+    }
+  
+    if(fsr1.checkInterval()){
+      Keyboard.write('M');
+      delay(fsr1.getInterval());
+    }
   }
   
   
@@ -66,13 +101,20 @@ void loop() {
   switch(Serial.read())
   {
     case 'A':
-      Serial.println("Received A, Accelerometer On");
-      accelOn = true;
+      Serial.println("Received A, Tilt On");
+      tiltOn = true;
       break;
     case 'Z':
-      Serial.println("Received Z, Accelerometer Off");
-      accelOn = false;
+      Serial.println("Received Z, Tilt Off");
+      tiltOn = false;
       break;
+    case 'T':
+      Serial.println("Received T, Bounce On");
+      bounceOn = true;
+      break;
+    case 'Y':
+      Serial.println("Received Y, Bounce Off");
+      bounceOn = false;
     case 'O':
       Serial.println("Received O, Keyboard On");
       buttonOn = true;
@@ -81,5 +123,42 @@ void loop() {
       Serial.println("Received F, Keyboard Off");
       buttonOn = false;
       break;
+    case 'Q':
+      Serial.println("Received Q, FSR On");
+      fsrOn = true;
+      break;
+    case 'W':
+      Serial.println("Received W, FSR Off");
+      fsrOn = false;
+      break;
+    case '/':
+      Serial.println("Received /, all sensors off");
+      buttonOn = false;
+      tiltOn = false;
+      fsrOn = false;
+      bounceOn = false;
+      break;
+  }
+}
+
+//check for Z axis movement
+bool detectBounce(sensors_event_t event, float threshold)
+{
+  float Z = 0;
+
+  for (int i=0; i<10; i++)
+  {
+    Z += event.acceleration.z;
+    delay(1);
+  }
+
+  Z /= 10;
+  float totalAccel = abs(Z);
+
+  if (totalAccel > threshold)
+  {
+    return true;
+  } else {
+    return false;
   }
 }
