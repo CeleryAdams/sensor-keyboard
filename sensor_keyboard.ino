@@ -5,17 +5,19 @@
 #include "Fsr.h"
 
 const int buttonPin = 2;
-
-int buttonState = 0;
-
 const int fsr1Pin = A4;
 const int fsr2Pin = A5;
+const int hallPin = 13;
 
 //initial key input states per sensor
 bool buttonOn = true;
 bool tiltOn = false;
 bool fsrOn = false;
 bool bounceOn = true;
+bool hallOn = true;
+
+int buttonState = 0;
+int hallReading;
 
 //instantiate accelerometer
 Adafruit_ADXL343 accel = Adafruit_ADXL343(12345, &Wire1);
@@ -39,11 +41,13 @@ void setup() {
   accel.setRange(ADXL343_RANGE_4_G);
 
   pinMode(buttonPin, INPUT);
+  pinMode(hallPin, INPUT);
 }
 
 void loop() {
   //get button input state
   buttonState = digitalRead(buttonPin);
+  hallReading = digitalRead(hallPin);
 
   //get accelerometer sensor event
   sensors_event_t event;
@@ -82,6 +86,13 @@ void loop() {
     Keyboard.write('B');
   }
 
+  //hall effect key input
+  if (hallOn && hallReading == LOW)
+  {
+    Keyboard.write('H');
+    delay(800);
+  }
+
   //fsr key input, interval between keypresses decreases with increased pressure
   if (fsrOn)
   {
@@ -95,6 +106,8 @@ void loop() {
       delay(fsr1.getInterval());
     }
   }
+
+
   
   
   //keyboard function on/off events received from Unity
@@ -130,6 +143,14 @@ void loop() {
     case 'W':
       Serial.println("Received W, FSR Off");
       fsrOn = false;
+      break;
+    case 'I':
+      Serial.println("Received I, Hall Effect On");
+      hallOn = true;
+      break;
+    case 'K':
+      Serial.println("Received K, Hall Effect Off");
+      hallOn = false;
       break;
     case '/':
       Serial.println("Received /, all sensors off");
