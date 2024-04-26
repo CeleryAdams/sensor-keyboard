@@ -13,8 +13,8 @@ const int hallPin = 13;
 bool buttonOn = true;
 bool tiltOn = false;
 bool fsrOn = false;
-bool bounceOn = true;
-bool hallOn = true;
+bool bounceOn = false;
+bool hallOn = false;
 
 int buttonState = 0;
 int hallReading;
@@ -30,7 +30,7 @@ void setup() {
   
   Serial.begin(9600);
 
-  //initialize accelerometer
+  // initialize accelerometer
   if(!accel.begin())
   {
     /* There was a problem detecting the ADXL343 ... check your connections */
@@ -108,8 +108,6 @@ void loop() {
   }
 
 
-  
-  
   //keyboard function on/off events received from Unity
   switch(Serial.read())
   {
@@ -129,11 +127,11 @@ void loop() {
       Serial.println("Received Y, Bounce Off");
       bounceOn = false;
     case 'O':
-      Serial.println("Received O, Keyboard On");
+      Serial.println("Received O, Button On");
       buttonOn = true;
       break;
     case 'F':
-      Serial.println("Received F, Keyboard Off");
+      Serial.println("Received F, Button Off");
       buttonOn = false;
       break;
     case 'Q':
