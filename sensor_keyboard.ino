@@ -26,6 +26,46 @@ Adafruit_ADXL343 accel = Adafruit_ADXL343(12345, &Wire1);
 Fsr fsr1(fsr1Pin, 200, 800);
 Fsr fsr2(fsr2Pin, 300, 900);
 
+
+
+/*
+class that creates a new timer and assigns a key press for each sensor
+*/
+class TimedWrite
+{
+  int delay;
+  char key;
+  unsigned long previousMillis;
+  unsigned long currentMillis;
+
+  public:
+  TimedWrite(int delay, char key)
+  {
+    this->delay = delay;
+    this->key = key;
+
+    previousMillis = 0;
+    currentMillis = millis();
+  }
+
+  void Update()
+  {
+    currentMillis = millis();
+    if (currentMillis - previousMillis >= delay)
+    {
+      Keyboard.write(key);
+      previousMillis = currentMillis;
+    }
+  }
+};
+
+//set keys and delays for each sensor
+TimedWrite buttonWrite(300, 'G');
+TimedWrite tiltLeftWrite(300, 'C');
+TimedWrite tiltRightWrite(300, 'X');
+TimedWrite bounceWrite(400, 'B');
+TimedWrite hallWrite(800, 'H');
+
 void setup() {
   
   Serial.begin(9600);
@@ -59,14 +99,12 @@ void loop() {
   {
     if (event.acceleration.x > 3.0)
     {
-      Keyboard.write('C');
-      delay(300);
+      tiltLeftWrite.Update();
     }
 
     if (event.acceleration.x < -2.0)
     {
-      Keyboard.write('X');
-      delay(300);
+      tiltRightWrite.Update();
     }
   }
 
@@ -76,22 +114,20 @@ void loop() {
     bool didBounce = detectBounce(event, 12.0);
     if (didBounce)
     {
-      Keyboard.write('G');
-      delay(400);
+      bounceWrite.Update();
     }
   }
 
   //button key input
   if (buttonOn && buttonState == HIGH)
   {
-    Keyboard.write('B');
+    buttonWrite.Update();
   }
 
   //hall effect key input
   if (hallOn && hallReading == LOW)
   {
-    Keyboard.write('H');
-    delay(800);
+    hallWrite.Update();
   }
 
   //fsr key input, enabled if value read from sensor is greater than minimum threshold set during instantiation
