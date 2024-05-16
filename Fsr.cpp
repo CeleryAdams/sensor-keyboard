@@ -1,4 +1,5 @@
 #include "Fsr.h"
+#include <Keyboard.h>
 
 Fsr::Fsr(int fsrPin, int minReading, int maxReading, int minDelay, int maxDelay) {
   this->fsrPin = fsrPin;
@@ -6,6 +7,8 @@ Fsr::Fsr(int fsrPin, int minReading, int maxReading, int minDelay, int maxDelay)
   this->maxReading = maxReading;
   this->minDelay = minDelay;
   this->maxDelay = maxDelay;
+  previousMillis = 0;
+  currentMillis = millis();
 }
 
 int Fsr::fsrReading() {
@@ -13,7 +16,7 @@ int Fsr::fsrReading() {
   return fsrReading;
 }
 
-bool Fsr::checkInterval() {
+bool Fsr::checkMinReading() {
   if (fsrReading() > minReading)
   {
     return true;
@@ -24,4 +27,14 @@ bool Fsr::checkInterval() {
 int Fsr::getInterval() {
   int interval = map(fsrReading(), minReading, maxReading, maxDelay, minDelay);
   return interval;
+}
+
+void Fsr::Write(char key)
+{
+  currentMillis = millis();
+  if (currentMillis - previousMillis >= getInterval())
+  {
+    Keyboard.write(key);
+    previousMillis = currentMillis;
+  }
 }

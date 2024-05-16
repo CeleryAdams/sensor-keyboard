@@ -94,17 +94,15 @@ void loop() {
     delay(800);
   }
 
-  //fsr key input, interval between keypresses decreases with increased pressure
+  //fsr key input, enabled if value read from sensor is greater than minimum threshold set during instantiation
   if (fsrOn)
   {
-    if(fsr2.checkInterval()){
-      Keyboard.write('N');
-      delay(fsr2.getInterval());
+    if(fsr2.checkMinReading()){
+      fsr2.Write('G');
     }
   
-    if(fsr1.checkInterval()){
-      Keyboard.write('M');
-      delay(fsr1.getInterval());
+    if(fsr1.checkMinReading()){
+      fsr1.Write('S');
     }
   }
 
