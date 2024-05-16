@@ -12,7 +12,7 @@ class Fsr {
     int maxDelay;
 
   public:
-    Fsr(int fsrPin, int minReading, int maxReading, int minDelay, int maxDelay);
+    Fsr(int fsrPin, int minReading, int maxReading, int minDelay = 100, int maxDelay = 800);
     int fsrReading();
     bool checkInterval();
     int getInterval();

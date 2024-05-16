@@ -23,8 +23,8 @@ int hallReading;
 Adafruit_ADXL343 accel = Adafruit_ADXL343(12345, &Wire1);
 
 //instantiate force sensitive resistors
-Fsr fsr1(fsr1Pin, 200, 800, 100, 800);
-Fsr fsr2(fsr2Pin, 300, 900, 100, 800);
+Fsr fsr1(fsr1Pin, 200, 800);
+Fsr fsr2(fsr2Pin, 300, 900);
 
 void setup() {
   
