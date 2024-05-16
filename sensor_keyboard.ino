@@ -29,6 +29,7 @@ Fsr fsr2(fsr2Pin, 300, 900, 100, 800);
 void setup() {
   
   Serial.begin(9600);
+  while (!Serial);
 
   // initialize accelerometer
   if(!accel.begin())
