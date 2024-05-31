@@ -7,7 +7,7 @@
 const int buttonPin = 2;
 const int fsr1Pin = A4;
 const int fsr2Pin = A5;
-const int hallPin = 13;
+const int hallPin = A3;
 
 //initial key input states per sensor
 bool buttonOn = true;
@@ -17,7 +17,9 @@ bool bounceOn = false;
 bool hallOn = false;
 
 int buttonState = 0;
-int hallReading;
+int initialHallValue;
+int hallValue;
+const int minHallValue = 15;
 
 //instantiate accelerometer
 Adafruit_ADXL343 accel = Adafruit_ADXL343(12345, &Wire1);
@@ -82,13 +84,13 @@ void setup() {
   accel.setRange(ADXL343_RANGE_4_G);
 
   pinMode(buttonPin, INPUT);
-  pinMode(hallPin, INPUT);
+  initialHallValue = analogRead(hallPin);
 }
 
 void loop() {
   //get button input state
   buttonState = digitalRead(buttonPin);
-  hallReading = digitalRead(hallPin);
+  hallValue = analogRead(hallPin);
 
   //get accelerometer sensor event
   sensors_event_t event;
@@ -125,9 +127,12 @@ void loop() {
   }
 
   //hall effect key input
-  if (hallOn && hallReading == LOW)
+  if (hallOn)
   {
-    hallWrite.Update();
+     if (abs(initialHallValue - hallValue) > minHallValue)
+    {
+      hallWrite.Update();
+    } 
   }
 
   //fsr key input, enabled if value read from sensor is greater than minimum threshold set during instantiation
@@ -191,6 +196,7 @@ void loop() {
       tiltOn = false;
       fsrOn = false;
       bounceOn = false;
+      hallOn = false;
       break;
   }
 }
