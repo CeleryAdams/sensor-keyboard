@@ -6,6 +6,7 @@ An Arduino-based keyboard controller that uses various sensors to trigger keyboa
 * Convert sensor readings into keyboard inputs
 * Runtime control via serial communication
 * Support for multiple sensor types
+* Variable-rate input control (for example, FSR pressure dynamically controls keypress frequency)
 * Compatible with any Arduino board with HID support
 * Tested with Unity using [Ardity](https://github.com/dwilches/Ardity).
 
