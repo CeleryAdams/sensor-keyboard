@@ -24,7 +24,7 @@ const int minHallValue = 15;
 //instantiate accelerometer
 Adafruit_ADXL343 accel = Adafruit_ADXL343(12345, &Wire1);
 
-//instantiate force sensitive resistors (fsrPin, minReading, maxReading)
+//instantiate force sensitive resistors and set read value thresholds (fsrPin, minReading, maxReading)
 Fsr fsr1(fsr1Pin, 200, 800);
 Fsr fsr2(fsr2Pin, 300, 900);
 
