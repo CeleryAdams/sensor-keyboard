@@ -24,7 +24,7 @@ const int minHallValue = 15;
 //instantiate accelerometer
 Adafruit_ADXL343 accel = Adafruit_ADXL343(12345, &Wire1);
 
-//instantiate force sensitive resistors
+//instantiate force sensitive resistors (fsrPin, minReading, maxReading)
 Fsr fsr1(fsr1Pin, 200, 800);
 Fsr fsr2(fsr2Pin, 300, 900);
 
@@ -76,7 +76,6 @@ void setup() {
   // initialize accelerometer
   if(!accel.begin())
   {
-    /* There was a problem detecting the ADXL343 ... check your connections */
     Serial.println("Ooops, no ADXL343 detected ... Check your wiring!");
     while(1);
   }
